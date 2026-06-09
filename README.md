@@ -1,6 +1,6 @@
 # speech-coach-ios
 
-Practice reading aloud and get instant feedback on your pace, pausing, clarity, and volume — all processed on your iPhone, nothing sent anywhere.
+Practice reading aloud and get instant feedback on your pace, pausing, clarity, and volume. All processing happens on your iPhone; nothing is sent anywhere.
 
 ## What it does
 
@@ -10,14 +10,14 @@ The feedback is built from two sources: deterministic signal-processing metrics 
 
 ## Stack
 
-- **SwiftUI** — all screens built natively, no third-party UI libs
-- **AVFoundation** — local mono recording to a temporary WAV file
-- **Accelerate / vDSP** — FFT, RMS, silence detection, spectrogram building
-- **Core ML** — on-device CNN inference for clarity scoring
-- **SwiftData** — local session history
-- **XCTest** — unit tests, fixture-based audio tests, performance measure blocks
+- **SwiftUI** - all screens built natively, no third-party UI libs
+- **AVFoundation** - local mono recording to a temporary WAV file
+- **Accelerate / vDSP** - FFT, RMS, silence detection, spectrogram building
+- **Core ML** - on-device CNN inference for clarity scoring
+- **SwiftData** - local session history
+- **XCTest** - unit tests, fixture-based audio tests, performance measure blocks
 
-The PyTorch model lives in `ml/` with conversion scripts for coremltools. The iOS app ships without a backend dependency — it falls back to deterministic scoring if the `.mlpackage` isn't bundled yet.
+The PyTorch model lives in `ml/` with conversion scripts for coremltools. The iOS app ships without a backend dependency and falls back to deterministic scoring if the `.mlpackage` isn't bundled yet.
 
 ## Project layout
 
@@ -71,7 +71,7 @@ The default training data is synthetic (five tiers from clear speech to silence)
 5. Set `NSMicrophoneUsageDescription` in Info.plist
 6. Run
 
-The app builds and works without the model — deterministic scoring kicks in automatically.
+The app builds and works without the model. Deterministic scoring kicks in automatically.
 
 ## Scoring
 
