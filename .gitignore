@@ -51,3 +51,7 @@ Icon?
 .Trashes
 *.swp
 *~
+
+# Xcode generated — keep xcodeproj but ignore user-specific data
+xcuserdata/
+*.xcworkspace/xcuserdata/
