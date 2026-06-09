@@ -62,9 +62,9 @@ Runs a single forward pass and checks outputs are in [0, 1].
 
 ## Copy into Xcode
 
-The default `--out` path already places the model inside the Xcode project. After running the
-conversion script, open Xcode → verify `FluencyScorer.mlpackage` appears in
-`Resources/` → build. Xcode compiles it into `.mlmodelc` automatically.
+The default `--out` path places the model at `OnDeviceSpeechCoach/Resources/FluencyScorer.mlpackage`
+(one level up from `ml/`). After running the conversion script, Xcode compiles it into
+`.mlmodelc` automatically on the next build.
 
 ## Model quality note
 

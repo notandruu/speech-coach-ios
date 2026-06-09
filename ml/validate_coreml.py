@@ -22,10 +22,12 @@ def validate(model_path: Path) -> None:
     spec = mlmodel.get_spec()
     print("\n— Inputs —")
     for inp in spec.description.input:
-        print(f"  {inp.name}: {[d.size for d in inp.type.multiArrayType.shape]}")
+        shape = list(inp.type.multiArrayType.shape)
+        print(f"  {inp.name}: {shape}")
     print("— Outputs —")
     for out in spec.description.output:
-        print(f"  {out.name}: {[d.size for d in out.type.multiArrayType.shape]}")
+        shape = list(out.type.multiArrayType.shape)
+        print(f"  {out.name}: {shape}")
 
     # Run inference
     test_input = np.random.rand(1, 1, MEL_BINS, MEL_FRAMES).astype(np.float32)
@@ -49,7 +51,7 @@ def main() -> None:
     parser.add_argument(
         "--model",
         type=Path,
-        default=Path("../OnDeviceSpeechCoach/OnDeviceSpeechCoach/Resources/FluencyScorer.mlpackage"),
+        default=Path("../OnDeviceSpeechCoach/Resources/FluencyScorer.mlpackage"),
     )
     args = parser.parse_args()
 

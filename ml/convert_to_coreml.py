@@ -64,7 +64,7 @@ def main() -> None:
     parser.add_argument(
         "--out",
         type=Path,
-        default=Path("../OnDeviceSpeechCoach/OnDeviceSpeechCoach/Resources/FluencyScorer.mlpackage"),
+        default=Path("../OnDeviceSpeechCoach/Resources/FluencyScorer.mlpackage"),
     )
     args = parser.parse_args()
 
