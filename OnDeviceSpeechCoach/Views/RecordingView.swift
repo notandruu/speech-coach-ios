@@ -27,7 +27,7 @@ struct RecordingView: View {
             case .done(let breakdown):
                 ResultsView(breakdown: breakdown, prompt: prompt)
             case .failed(let message):
-                errorView(message: message)
+                errorView(message)
             }
         }
         .navigationTitle(prompt.title)

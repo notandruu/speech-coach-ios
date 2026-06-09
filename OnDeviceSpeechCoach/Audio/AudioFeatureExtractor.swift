@@ -33,7 +33,7 @@ struct AudioFeatureExtractor {
         }
 
         let rms = computeRMS(samples)
-        let avgDB = 20 * log10(max(rms, 1e-9))
+        let avgDB = 20.0 * Darwin.log10(Double(max(rms, Float(1e-9))))
         let variance = computeVariance(samples)
 
         let mel = buildApproximateMelSpectrogram(samples: samples)
@@ -96,9 +96,9 @@ struct AudioFeatureExtractor {
         return std * std
     }
 
-    /// Produces a fixed 64×128 float array approximating log-mel energy.
-    /// For a production model use vDSP FFT + proper filterbank; this gives
-    /// the right shape for Core ML while remaining fast and dependency-free.
+    /// Produces a fixed 64×128 float array of log-energy features.
+    /// Uses vDSP FFT via the Swift overlay (vDSP.DFT) for correctness on all
+    /// Apple SDK versions. Bins the power spectrum into 64 mel-like bands per frame.
     private func buildApproximateMelSpectrogram(samples: [Float]) -> [Float] {
         let bins = AppConstants.Audio.melBins
         let frames = AppConstants.Audio.melFrames
@@ -106,10 +106,11 @@ struct AudioFeatureExtractor {
         guard !samples.isEmpty else { return Array(repeating: 0, count: total) }
 
         let fftSize = 512
+        let halfLen = fftSize / 2
         let hopSize = max(1, samples.count / frames)
 
-        var setup = vDSP_DFT_zop_CreateSetup(nil, vDSP_Length(fftSize), vDSP_DFT_FORWARD)
-        defer { if let s = setup { vDSP_DFT_DestroySetup(s) } }
+        // Use vDSP.DFT Swift overlay — avoids C-level constant availability issues.
+        let dft = try? vDSP.DFT(count: fftSize, direction: .forward, transformType: .complexComplex, ofType: Float.self)
 
         var result = [Float](repeating: 0, count: total)
 
@@ -119,28 +120,32 @@ struct AudioFeatureExtractor {
             let frameLen = sampleEnd - sampleStart
 
             var real = [Float](repeating: 0, count: fftSize)
-            var imag = [Float](repeating: 0, count: fftSize)
             real[0..<frameLen] = samples[sampleStart..<sampleEnd]
+            let imag = [Float](repeating: 0, count: fftSize)
 
-            if let setup {
-                vDSP_DFT_Execute(setup, real, imag, &real, &imag)
+            var outReal = [Float](repeating: 0, count: fftSize)
+            var outImag = [Float](repeating: 0, count: fftSize)
+
+            if let dft {
+                dft.transform(inputReal: real, inputImaginary: imag, outputReal: &outReal, outputImaginary: &outImag)
+            } else {
+                outReal = real  // fallback: use raw samples as proxy
             }
 
-            // Compute power spectrum for first half (Nyquist)
-            let halfLen = fftSize / 2
+            // Power spectrum for first half (DC to Nyquist)
             var power = [Float](repeating: 0, count: halfLen)
             for i in 0..<halfLen {
-                power[i] = real[i] * real[i] + imag[i] * imag[i]
+                power[i] = outReal[i] * outReal[i] + outImag[i] * outImag[i]
             }
 
-            // Bin into mel buckets (linear approximation)
+            // Bin into mel-like bands
             let binSize = max(1, halfLen / bins)
             for bin in 0..<bins {
                 let start = bin * binSize
                 let end = min(start + binSize, halfLen)
                 var energy: Float = 0
                 vDSP_sve(Array(power[start..<end]), 1, &energy, vDSP_Length(end - start))
-                result[bin * frames + frame] = log(max(energy, 1e-10))
+                result[bin * frames + frame] = Darwin.log(max(energy, Float(1e-10)))
             }
         }
 
