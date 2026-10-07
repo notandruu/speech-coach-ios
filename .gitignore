@@ -55,3 +55,6 @@ Icon?
 # Xcode generated — keep xcodeproj but ignore user-specific data
 xcuserdata/
 *.xcworkspace/xcuserdata/
+CLAUDE.md
+AGENTS.md
+.claude/
